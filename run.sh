@@ -24,6 +24,7 @@ while true; do
     echo -e "${CYAN}-------------------------------------------------------${NC}"
     echo "Select an option to install:"
     echo -e "${GREEN}10)${NC}Puffer Panel"
+    echo -e "${GREEN}10)${NC}Hydra Panel"
     echo -e "${RED}0) Exit${NC}"
     echo -e "${CYAN}-------------------------------------------------------${NC}"
 
@@ -31,6 +32,7 @@ while true; do
 
     case $main_choice in
         1) bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Telebit.panel.edition-/main/PufferPanel/PufferPanel.sh) ;;
+        2) bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Telebit.panel.edition/main/Hydra/Hydra.sh) ;;
         
         0)
             echo -e "${YELLOW}Redirecting... Goodbye!${NC}"
