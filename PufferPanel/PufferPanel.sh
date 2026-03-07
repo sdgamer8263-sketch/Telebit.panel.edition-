@@ -97,7 +97,7 @@ while true; do
                 curl -s https://packagecloud.io/install/repositories/pufferpanel/pufferpanel/script.deb.sh | bash
                 
                 echo -e "${CYAN}>> Installing Panel...${RESET}"
-                apt install pufferpanel -y
+                sudo apt-get install -y pufferpanel
             
             else
                 echo -e "${RED}[!] Unsupported OS: $OS${RESET}"
