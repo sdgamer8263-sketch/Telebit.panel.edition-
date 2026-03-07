@@ -46,9 +46,8 @@ install_dependencies() {
     if [[ "$OS" == "ubuntu" || "$OS" == "debian" || "$LIKE" == *"debian"* ]]; then
         # --- UBUNTU / DEBIAN LOGIC (APT) ---
         echo -e "${CYAN}* Using APT package manager...${NC}"
-        sudo su
         sudo apt update
-        sudo apt install -y curl software-properties-common git
+        sudo apt install -y curl software-properties-common 
         
         # Install Node.js 20
         curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -57,7 +56,6 @@ install_dependencies() {
     elif [[ "$OS" == "fedora" || "$OS" == "centos" || "$OS" == "rhel" || "$LIKE" == *"fedora"* ]]; then
         # --- FEDORA / RHEL LOGIC (DNF) ---
         echo -e "${CYAN}* Using DNF package manager...${NC}"
-        sudo su
         sudo dnf update -y
         sudo dnf install -y curl git
         
@@ -242,4 +240,3 @@ while true; do
             ;;
     esac
 done
-
