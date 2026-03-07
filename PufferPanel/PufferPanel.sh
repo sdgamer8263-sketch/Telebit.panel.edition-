@@ -94,7 +94,7 @@ while true; do
                 apt install neofetch -y 2>/dev/null || echo "Fastfetch skipped"
 
                 echo -e "${CYAN}>> Adding PufferPanel Repo...${RESET}"
-                curl -s https://packagecloud.io/install/repositories/pufferpanel/pufferpanel/script.deb.sh | bash
+                curl -s https://packagecloud.io/install/repositories/pufferpanel/pufferpanel/script.deb.sh\?any\=true | sudo bash
                 
                 echo -e "${CYAN}>> Installing Panel...${RESET}"
                 sudo apt-get install -y pufferpanel
@@ -114,7 +114,7 @@ while true; do
             systemctl enable --now pufferpanel
             systemctl start pufferpanel
 
-            echo ""
+            echo "Localhost:8080 (http)"
             echo -e "${GREEN}==================================================${RESET}"
             echo -e "${GREEN}         INSTALLATION COMPLETE - SDGAMER          ${RESET}"
             echo -e "${GREEN}==================================================${RESET}"
