@@ -1,240 +1,127 @@
 #!/bin/bash
 
-# Colors
+# Define Colors for formatting
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
-YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# ASCII Art Function
+# --- Function: Display SDGAMER Banner ---
 show_banner() {
     clear
     echo -e "${CYAN}"
-    echo "   _____ ____   _____    _    __  __  ____ ____  "
-    echo "  / ____|  _ \ / ____|  / \  |  \/  ||  __|  _ \ "
-    echo " | (___ | | | | |  __  / _ \ | \  / || |__ | |_) |"
-    echo "  \___ \| | | | | |_ |/ ___ \| |\/| ||  __||  _ < "
-    echo "  ____) | |_| | |__| / /   \ \ |  | || |___| | \ \ "
-    echo " |_____/|____/ \_____/_/   \_\_|  |_||_____|_|  \_\ "
-    echo -e "${NC}"
-    echo -e "${BLUE}    Hydra Panel + Daemon Installer (SDGAMER)    ${NC}"
-    echo "----------------------------------------------------"
+    echo "  ____  ____   ____    _    __  __ _____ ____  "
+    echo " / ___||  _ \ / ___|  / \  |  \/  | ____|  _ \ "
+    echo " \___ \| | | | |  _  / _ \ | |\/| |  _| | |_) |"
+    echo "  ___) | |_| | |_| |/ ___ \| |  | | |___|  _ < "
+    echo " |____/|____/ \____/_/   \_\_|  |_|_____|_| \_\\"
+    echo -e "${BLUE}        Hydra Panel Manager by SDGAMER${NC}"
+    echo "================================================="
 }
 
-# Check if the script is run as root
-if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}Please run this script as root.${NC}"
-  exit 1
-fi
-
-# Function to Detect OS and Install Dependencies
-install_dependencies() {
-    # Load OS information
+# --- Function: Install Panel (OS Detection) ---
+install_panel() {
+    echo -e "${YELLOW}[*] Detecting Operating System...${NC}"
+    
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         OS=$ID
-        LIKE=$ID_LIKE
+        
+        if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
+            echo -e "${GREEN}[+] Detected $OS. Installing Hydra for Debian/Ubuntu...${NC}"
+            bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra1.sh)
+        elif [[ "$OS" == "fedora" ]]; then
+            echo -e "${GREEN}[+] Detected $OS. Installing Hydra for Fedora...${NC}"
+            bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra2.sh)
+        else
+            echo -e "${RED}[!] Unsupported OS Detected: $OS${NC}"
+            echo "Please use Ubuntu, Debian, or Fedora."
+        fi
     else
-        echo -e "${RED}OS cannot be detected. Exiting.${NC}"
-        return 1
-    fi
-
-    echo -e "${YELLOW}* Detected OS: $PRETTY_NAME${NC}"
-
-    if [[ "$OS" == "ubuntu" || "$OS" == "debian" || "$LIKE" == *"debian"* ]]; then
-        # --- UBUNTU / DEBIAN LOGIC (APT) ---
-        echo -e "${CYAN}* Using APT package manager...${NC}"
-        sudo apt update
-        sudo apt install -y curl software-properties-common git
-        
-        # Install Node.js 20
-        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-        sudo apt-get install nodejs -y 
-
-    elif [[ "$OS" == "fedora" || "$OS" == "centos" || "$OS" == "rhel" || "$LIKE" == *"fedora"* ]]; then
-        # --- FEDORA / RHEL LOGIC (DNF) ---
-        echo -e "${CYAN}* Using DNF package manager...${NC}"
-        sudo dnf update -y
-        sudo dnf install -y curl git
-        
-        # Install Node.js 20 (RPM version)
-        curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
-        sudo dnf install -y nodejs
-
-    else
-        echo -e "${RED}* Unsupported OS. Please use Ubuntu, Debian, or Fedora.${NC}"
-        return 1
-    fi
-}
-
-# Function to Install Hydra Panel (Modified as per request)
-install_panel() {
-    echo -e "${YELLOW}* Starting Panel Installation...${NC}"
-    
-    # 1. Install Dependencies based on OS
-    install_dependencies
-    
-    if [ -d "oversee-fixed" ]; then
-        echo -e "${RED}Error: 'oversee-fixed' directory already exists.${NC}"
-        read -p "Press Enter to return..."
-        return
-    fi
-
-    echo -e "${GREEN}* Installing Files (Cloning oversee-fixed)...${NC}"
-
-    # 2. Run the specific command chain requested
-    # Note: Using 'set -e' logic via && to ensure it stops if a step fails
-    git clone https://github.com/draco-labes/oversee-fixed.git && cd oversee-fixed && npm install && npm run seed && npm run createUser && node . 
-    
-    echo -e "${GREEN}* Installed Files${NC}"
-    echo -e "${CYAN}* Starting Skyport (Hydra)...${NC}"
-    echo -e "${GREEN}* Skyport Installed and Started on Port 3001 and for Cloudflare Localhost:3001 (hhtp)${NC}"
-    
-    
-    # If the user stops the node process with Ctrl+C, they return here
-    read -p "Press Enter to return to menu..."
-}
-
-# Function to Install Hydra Daemon (Node)
-install_node() {
-    echo -e "${YELLOW}* Starting Daemon (Node) Installation...${NC}"
-    install_dependencies
-
-    if [ -d "HydraDAEMON" ]; then
-        echo -e "${RED}Error: 'HydraDAEMON' directory already exists.${NC}"
-        read -p "Press Enter to return..."
-        return
-    fi
-
-    git clone https://github.com/hydren-dev/HydraDAEMON
-    
-    if [ -d "HydraDAEMON" ]; then
-        cd HydraDAEMON
-        npm install
-        
-        echo -e "${GREEN}* Dependencies Installed.${NC}"
-        echo -e "${YELLOW}-----------------------------------------------------"
-        echo -e "PLEASE PASTE YOUR CONFIGURATION COMMAND NOW."
-        echo -e "(Copy the command from your Panel and paste it here, then press Enter)"
-        echo -e "-----------------------------------------------------${NC}"
-        
-        # Allowing user to run the config command
-        read -p "Command > " config_cmd
-        eval "$config_cmd"
-        
-        echo -e "${CYAN}* Starting Node...${NC}"
-        node .
-    else
-        echo -e "${RED}Failed to clone HydraDAEMON.${NC}"
+        echo -e "${RED}[!] Cannot detect OS. /etc/os-release not found.${NC}"
     fi
     read -p "Press Enter to return to menu..."
 }
 
-# Function to Start Services (Again Start)
+# --- Function: Add Node ---
+add_node() {
+    echo -e "${YELLOW}[*] Setting up HydraDAEMON Node...${NC}"
+    
+    # 1. Git Clone
+    if [ -d "HydraDAEMON" ]; then
+        echo -e "${RED}Directory HydraDAEMON already exists. Skipping clone.${NC}"
+    else
+        git clone https://github.com/hydren-dev/HydraDAEMON
+    fi
+
+    # 2. Enter Directory
+    cd HydraDAEMON || { echo "Failed to enter directory"; return; }
+
+    # 3. NPM Install
+    echo -e "${YELLOW}[*] Installing dependencies...${NC}"
+    npm install
+
+    # 4. Configure
+    echo -e "${GREEN}[*] Create your configuration file.${NC}"
+    echo "Please create/paste your configuration (usually config.json or config.yml)."
+    echo "Use 'nano config.json' to edit manually if needed."
+    read -p "Press Enter to open nano editor to paste your config (Save with Ctrl+O, Exit with Ctrl+X)..."
+    nano config.json
+
+    # 5. Start
+    echo -e "${GREEN}[*] Starting Node...${NC}"
+    node .
+    
+    # Return to previous directory
+    cd ..
+    read -p "Press Enter to return to menu..."
+}
+
+# --- Function: Again Start (Restart Services) ---
 start_services() {
-    while true; do
-        clear
-        echo -e "${BLUE}=== Start Services ===${NC}"
-        echo "1. Start Panel (Dash)"
-        echo "2. Start Node (Daemon)"
-        echo "3. Back to Main Menu"
-        echo ""
-        echo -n "Select what to start: "
-        read start_choice
-
-        case $start_choice in
-            1)
-                if [ -d "oversee-fixed" ]; then
-                    cd oversee-fixed
-                    echo -e "${GREEN}* Starting Panel from 'oversee-fixed'...${NC}"
-                    node .
-                elif [ -d "panel" ]; then
-                    cd panel
-                    echo -e "${GREEN}* Starting Panel from 'panel'...${NC}"
-                    node .
-                else
-                    echo -e "${RED}Error: Neither 'oversee-fixed' nor 'panel' folder found.${NC}"
-                    read -p "Press Enter to continue..."
-                fi
-                ;;
-            2)
-                if [ -d "HydraDAEMON" ]; then
-                    cd HydraDAEMON
-                    echo -e "${GREEN}* Starting Daemon...${NC}"
-                    node .
-                else
-                    echo -e "${RED}Error: 'HydraDAEMON' folder not found.${NC}"
-                    read -p "Press Enter to continue..."
-                fi
-                ;;
-            3)
-                return
-                ;;
-            *)
-                echo -e "${RED}Invalid Option.${NC}"
-                sleep 1
-                ;;
-        esac
-    done
-}
-
-# Function to Uninstall
-uninstall_all() {
-    echo -e "${YELLOW}* Uninstalling...${NC}"
+    echo -e "${YELLOW}[*] Instructions to Restart Dashboard & Daemon${NC}"
+    echo "================================================="
     
-    if [ -d "panel" ]; then
-        rm -rf panel
-        echo -e "${GREEN}* Panel (Old) removed.${NC}"
-    fi
+    echo -e "${CYAN}Terminal 1 (Dashboard):${NC}"
+    echo "  1) cd oversee-fixed"
+    echo "  2) node ."
+    echo ""
+    echo -e "${CYAN}Terminal 2 (Daemon/Node):${NC}"
+    echo "  3) Create a new terminal session (+)"
+    echo "  4) cd HydraDAEMON"
+    echo "  5) node ."
+    echo "================================================="
     
-    if [ -d "oversee-fixed" ]; then
-        rm -rf oversee-fixed
-        echo -e "${GREEN}* Oversee-fixed (New Panel) removed.${NC}"
+    read -p "Do you want to run the Dashboard (Terminal 1) now? (y/n): " choice
+    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+        if [ -d "oversee-fixed" ]; then
+            cd oversee-fixed
+            node .
+            cd ..
+        else
+            echo -e "${RED}[!] Directory 'oversee-fixed' not found.${NC}"
+        fi
     fi
-
-    if [ -d "HydraDAEMON" ]; then
-        rm -rf HydraDAEMON
-        echo -e "${GREEN}* HydraDAEMON removed.${NC}"
-    fi
-    
-    echo -e "${CYAN}Uninstall Complete.${NC}"
     read -p "Press Enter to return to menu..."
 }
 
-# Main Menu Loop
+# --- Main Logic Loop ---
 while true; do
     show_banner
-    echo -e "${GREEN}1.${NC} Install Hydra Panel + Dash (Oversee-Fixed)"
-    echo -e "${GREEN}2.${NC} Install Node (HydraDAEMON)"
-    echo -e "${CYAN}3.${NC} Again Start (Start Panel/Node)"
-    echo -e "${RED}4.${NC} Uninstall All"
-    echo -e "${YELLOW}5.${NC} Exit"
+    echo -e "${GREEN}1)${NC} Install Panel (Auto OS Detect)"
+    echo -e "${GREEN}2)${NC} Add Node"
+    echo -e "${GREEN}3)${NC} Start Services (Again Start)"
+    echo -e "${RED}0)${NC} Exit"
     echo ""
-    echo -n "Select an option: "
-    read choice
+    read -p "Select an option: " option
 
-    case $choice in
-        1)
-            install_panel
-            ;;
-        2)
-            install_node
-            ;;
-        3)
-            start_services
-            ;;
-        4)
-            uninstall_all
-            ;;
-        5)
-            echo -e "${CYAN}Exiting... Goodbye!${NC}"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Invalid Input. Please try again.${NC}"
-            sleep 1.5
-            ;;
+    case $option in
+        1) install_panel ;;
+        2) add_node ;;
+        3) start_services ;;
+        0) echo -e "${RED}Exiting...${NC}"; exit 0 ;;
+        *) echo -e "${RED}Invalid option.${NC}"; sleep 1 ;;
     esac
 done
