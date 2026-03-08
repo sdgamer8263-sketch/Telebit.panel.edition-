@@ -86,17 +86,12 @@ install_panel() {
 
     # 2. Run the specific command chain requested
     # Note: Using 'set -e' logic via && to ensure it stops if a step fails
-    git clone https://github.com/draco-labes/oversee-fixed.git && \
-    cd oversee-fixed && \
-    npm install && \
-    npm run seed && \
-    npm run createUser && \
+    git clone https://github.com/draco-labes/oversee-fixed.git && cd oversee-fixed && npm install && npm run seed && npm run createUser && node . 
     
     echo -e "${GREEN}* Installed Files${NC}"
     echo -e "${CYAN}* Starting Skyport (Hydra)...${NC}"
-    echo -e "${GREEN}* Skyport Installed and Started on Port 3001${NC}"
+    echo -e "${GREEN}* Skyport Installed and Started on Port 3001 and for Cloudflare Localhost:3001 (hhtp)${NC}"
     
-    node .
     
     # If the user stops the node process with Ctrl+C, they return here
     read -p "Press Enter to return to menu..."
