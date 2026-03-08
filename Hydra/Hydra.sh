@@ -1,127 +1,116 @@
 #!/bin/bash
 
-# Define Colors for formatting
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# --- Function: Display SDGAMER Banner ---
+# Function to display the banner
 show_banner() {
     clear
-    echo -e "${CYAN}"
-    echo "  ____  ____   ____    _    __  __ _____ ____  "
-    echo " / ___||  _ \ / ___|  / \  |  \/  | ____|  _ \ "
-    echo " \___ \| | | | |  _  / _ \ | |\/| |  _| | |_) |"
-    echo "  ___) | |_| | |_| |/ ___ \| |  | | |___|  _ < "
-    echo " |____/|____/ \____/_/   \_\_|  |_|_____|_| \_\\"
-    echo -e "${BLUE}        Hydra Panel Manager by SDGAMER${NC}"
-    echo "================================================="
+    echo -e "\033[1;36m"
+    echo "  ____  ____   ____    _    __  __  ____ ____  "
+    echo " / ___||  _ \ / ___|  / \  |  \/  || ____|  _ \ "
+    echo " \___ \| | | | |  _  / _ \ | |\/| ||  _| | |_) |"
+    echo "  ___) | |_| | |_| |/ ___ \| |  | || |___|  _ < "
+    echo " |____/|____/ \____/_/   \_\_|  |_||_____|_| \_\\"
+    echo -e "\033[0m"
+    echo -e "\033[1;32m      Hydra Management Script \033[0m"
+    echo "==================================================="
 }
 
-# --- Function: Install Panel (OS Detection) ---
-install_panel() {
-    echo -e "${YELLOW}[*] Detecting Operating System...${NC}"
-    
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        OS=$ID
-        
-        if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
-            echo -e "${GREEN}[+] Detected $OS. Installing Hydra for Debian/Ubuntu...${NC}"
-            bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra1.sh)
-        elif [[ "$OS" == "fedora" ]]; then
-            echo -e "${GREEN}[+] Detected $OS. Installing Hydra for Fedora...${NC}"
-            bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra2.sh)
-        else
-            echo -e "${RED}[!] Unsupported OS Detected: $OS${NC}"
-            echo "Please use Ubuntu, Debian, or Fedora."
-        fi
-    else
-        echo -e "${RED}[!] Cannot detect OS. /etc/os-release not found.${NC}"
-    fi
-    read -p "Press Enter to return to menu..."
-}
-
-# --- Function: Add Node ---
-add_node() {
-    echo -e "${YELLOW}[*] Setting up HydraDAEMON Node...${NC}"
-    
-    # 1. Git Clone
-    if [ -d "HydraDAEMON" ]; then
-        echo -e "${RED}Directory HydraDAEMON already exists. Skipping clone.${NC}"
-    else
-        git clone https://github.com/hydren-dev/HydraDAEMON
-    fi
-
-    # 2. Enter Directory
-    cd HydraDAEMON || { echo "Failed to enter directory"; return; }
-
-    # 3. NPM Install
-    echo -e "${YELLOW}[*] Installing dependencies...${NC}"
-    npm install
-
-    # 4. Configure
-    echo -e "${GREEN}[*] Create your configuration file.${NC}"
-    echo "Please create/paste your configuration (usually config.json or config.yml)."
-    echo "Use 'nano config.json' to edit manually if needed."
-    read -p "Press Enter to open nano editor to paste your config (Save with Ctrl+O, Exit with Ctrl+X)..."
-    nano config.json
-
-    # 5. Start
-    echo -e "${GREEN}[*] Starting Node...${NC}"
-    node .
-    
-    # Return to previous directory
-    cd ..
-    read -p "Press Enter to return to menu..."
-}
-
-# --- Function: Again Start (Restart Services) ---
-start_services() {
-    echo -e "${YELLOW}[*] Instructions to Restart Dashboard & Daemon${NC}"
-    echo "================================================="
-    
-    echo -e "${CYAN}Dashboard Starting:${NC}"
-     cd oversee-fixed
-     node .
-    echo "Node Starting"
-      Create a new terminal session (+)
-     cd HydraDAEMON
-       node .
-       
-    echo "================================================="
-    
-    read -p "Do you want to run the Dashboard (Terminal 1) now? (y/n): " choice
-    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-        if [ -d "oversee-fixed" ]; then
-            cd oversee-fixed
-            node .
-            cd ..
-        else
-            echo -e "${RED}[!] Directory 'oversee-fixed' not found.${NC}"
-        fi
-    fi
-    read -p "Press Enter to return to menu..."
-}
-
-# --- Main Logic Loop ---
+# Main Logic
 while true; do
     show_banner
-    echo -e "${GREEN}1)${NC} Install Panel (Auto OS Detect)"
-    echo -e "${GREEN}2)${NC} Add Node"
-    echo -e "${GREEN}3)${NC} Start Services (Again Start)"
-    echo -e "${RED}0)${NC} Exit"
-    echo ""
-    read -p "Select an option: " option
+    echo "1. Install Hydra (Auto-detect OS)"
+    echo "2. Add Node & Configure"
+    echo "3. Start Again (Oversee & HydraDAEMON)"
+    echo "4. Exit"
+    echo "==================================================="
+    read -p "Select an option [1-4]: " choice
 
-    case $option in
-        1) install_panel ;;
-        2) add_node ;;
-        3) start_services ;;
-        0) echo -e "${RED}Exiting...${NC}"; exit 0 ;;
-        *) echo -e "${RED}Invalid option.${NC}"; sleep 1 ;;
+    case $choice in
+        1)
+            echo "Checking Operating System..."
+            # Check for OS release file
+            if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                OS_NAME=$ID
+                LIKE_OS=$ID_LIKE
+                
+                # Logic for Ubuntu/Debian
+                if [[ "$OS_NAME" == "ubuntu" || "$OS_NAME" == "debian" || "$LIKE_OS" == *"debian"* ]]; then
+                    echo "Debian/Ubuntu detected. Running Hydra1..."
+                    bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra1.sh)
+                
+                # Logic for Fedora
+                elif [[ "$OS_NAME" == "fedora" || "$LIKE_OS" == *"fedora"* ]]; then
+                    echo "Fedora detected. Running Hydra2..."
+                    bash <(curl -s https://raw.githubusercontent.com/sdgamer8263-sketch/Panel/main/Hydra/Hydra2.sh)
+                
+                else
+                    echo -e "\033[1;31mUnsupported OS detected: $OS_NAME\033[0m"
+                fi
+            else
+                echo "Cannot detect OS information."
+            fi
+            read -p "Press Enter to return to menu..."
+            ;;
+        
+        2)
+            echo "Cloning HydraDAEMON..."
+            git clone https://github.com/hydren-dev/HydraDAEMON
+            
+            if [ -d "HydraDAEMON" ]; then
+                cd HydraDAEMON
+                echo "Installing dependencies..."
+                npm install
+                
+                echo "---------------------------------------------------"
+                echo -e "\033[1;33mACTION REQUIRED:\033[0m"
+                echo "Please paste/setup your configuration files now."
+                echo "Once you have finished configuring, press Enter to start the node."
+                echo "---------------------------------------------------"
+                read -p ""
+                
+                echo "Starting Node..."
+                node .
+            else
+                echo "Error: Directory HydraDAEMON not found."
+            fi
+            read -p "Press Enter to return to menu..."
+            ;;
+            
+        3)
+            echo "Starting Oversee and HydraDAEMON..."
+            
+            # Note: node . is usually a blocking command. 
+            # If the first one runs effectively, the second might not start until the first stops.
+            # Running exactly as requested:
+            
+            if [ -d "oversee-fixed" ]; then
+                cd oversee-fixed
+                node .
+            else
+                echo "Warning: oversee-fixed directory not found."
+            fi
+
+            if [ -d "../HydraDAEMON" ]; then
+                cd ../HydraDAEMON
+                node .
+            elif [ -d "HydraDAEMON" ]; then
+                cd HydraDAEMON
+                node .
+            else 
+                echo "Warning: HydraDAEMON directory not found."
+            fi
+            
+            read -p "Press Enter to return to menu..."
+            ;;
+            
+        4)
+            echo "Exiting..."
+            exit 0
+            ;;
+            
+        *)
+            echo "Invalid option."
+            read -p "Press Enter to continue..."
+            ;;
     esac
 done
