@@ -47,11 +47,11 @@ install_dependencies() {
         # --- UBUNTU / DEBIAN LOGIC (APT) ---
         echo -e "${CYAN}* Using APT package manager...${NC}"
         sudo apt update
-        sudo apt install -y curl software-properties-common 
+        sudo apt install -y curl software-properties-common git
         
         # Install Node.js 20
         curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-        sudo apt install -y nodejs
+        sudo apt-get install nodejs -y 
 
     elif [[ "$OS" == "fedora" || "$OS" == "centos" || "$OS" == "rhel" || "$LIKE" == *"fedora"* ]]; then
         # --- FEDORA / RHEL LOGIC (DNF) ---
@@ -59,7 +59,7 @@ install_dependencies() {
         sudo dnf update -y
         sudo dnf install -y curl git
         
-        # Install Node.js 20
+        # Install Node.js 20 (RPM version)
         curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
         sudo dnf install -y nodejs
 
@@ -69,32 +69,36 @@ install_dependencies() {
     fi
 }
 
-# Function to Install Hydra Panel
+# Function to Install Hydra Panel (Modified as per request)
 install_panel() {
     echo -e "${YELLOW}* Starting Panel Installation...${NC}"
+    
+    # 1. Install Dependencies based on OS
     install_dependencies
     
-    if [ -d "panel" ]; then
-        echo -e "${RED}Error: 'panel' directory already exists.${NC}"
+    if [ -d "oversee-fixed" ]; then
+        echo -e "${RED}Error: 'oversee-fixed' directory already exists.${NC}"
         read -p "Press Enter to return..."
         return
     fi
 
-    # Clone and Setup
-    git clone https://github.com/HydraLabs-beta/panel.git
+    echo -e "${GREEN}* Installing Files (Cloning oversee-fixed)...${NC}"
+
+    # 2. Run the specific command chain requested
+    # Note: Using 'set -e' logic via && to ensure it stops if a step fails
+    git clone https://github.com/draco-labes/oversee-fixed.git && \
+    cd oversee-fixed && \
+    npm install && \
+    npm run seed && \
+    npm run createUser && \
     
-    if [ -d "panel" ]; then
-        cd panel
-        npm install
-        npm run seed
-        npm run createUser
-        
-        echo -e "${GREEN}* Hydra Panel Installed Successfully!${NC}"
-        echo -e "${CYAN}* Starting Hydra Panel...${NC}"
-        node .
-    else
-        echo -e "${RED}Failed to clone repository.${NC}"
-    fi
+    echo -e "${GREEN}* Installed Files${NC}"
+    echo -e "${CYAN}* Starting Skyport (Hydra)...${NC}"
+    echo -e "${GREEN}* Skyport Installed and Started on Port 3001${NC}"
+    
+    node .
+    
+    # If the user stops the node process with Ctrl+C, they return here
     read -p "Press Enter to return to menu..."
 }
 
@@ -147,7 +151,6 @@ start_services() {
 
         case $start_choice in
             1)
-                # Tries to find oversee-fixed first, then panel
                 if [ -d "oversee-fixed" ]; then
                     cd oversee-fixed
                     echo -e "${GREEN}* Starting Panel from 'oversee-fixed'...${NC}"
@@ -188,12 +191,12 @@ uninstall_all() {
     
     if [ -d "panel" ]; then
         rm -rf panel
-        echo -e "${GREEN}* Panel removed.${NC}"
+        echo -e "${GREEN}* Panel (Old) removed.${NC}"
     fi
     
     if [ -d "oversee-fixed" ]; then
         rm -rf oversee-fixed
-        echo -e "${GREEN}* Oversee-fixed removed.${NC}"
+        echo -e "${GREEN}* Oversee-fixed (New Panel) removed.${NC}"
     fi
 
     if [ -d "HydraDAEMON" ]; then
@@ -208,7 +211,7 @@ uninstall_all() {
 # Main Menu Loop
 while true; do
     show_banner
-    echo -e "${GREEN}1.${NC} Install Hydra Panel + Dash"
+    echo -e "${GREEN}1.${NC} Install Hydra Panel + Dash (Oversee-Fixed)"
     echo -e "${GREEN}2.${NC} Install Node (HydraDAEMON)"
     echo -e "${CYAN}3.${NC} Again Start (Start Panel/Node)"
     echo -e "${RED}4.${NC} Uninstall All"
